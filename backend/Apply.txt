@@ -1,0 +1,6 @@
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/frontend-nginx-configmap.yaml
+kubectl apply -f k8s/backend-deploy.yaml -f k8s/backend-svc.yaml
+kubectl apply -f k8s/frontend-deploy.yaml -f k8s/frontend-svc.yaml
+
+kubectl -n monitoring-dashboard get all

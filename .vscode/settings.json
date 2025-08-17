@@ -1,0 +1,5 @@
+{
+    "files.exclude": {
+        "backend/app.py": true
+    }
+}

@@ -1,0 +1,8 @@
+kubectl logs -n monitoring-dashboard deployment/backend
+kubectl logs -n monitoring-dashboard deployment/frontend
+kubectl get pods -n monitoring-dashboard
+
+---
+
+✅ If you do this, your repo will be **interview-ready & production-like**.  
+Do you want me to **create all these files (Dockerfiles, docker-compose.yml, k8s, workflow, README.md)** in one zipped structure so you can directly push to your repo?

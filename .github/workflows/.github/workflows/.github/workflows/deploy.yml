@@ -1,0 +1,70 @@
+name: Deploy (build, push, apply)
+
+on:
+  push:
+    branches: [ "main" ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_BACKEND: ghcr.io/Girish7010/metrics-backend
+  IMAGE_FRONTEND: ghcr.io/Girish7010/metrics-frontend
+  TAG: ${{ github.sha }}
+
+jobs:
+  deploy:
+    runs-on: self-hosted   # <<< run this on your minikube box
+    steps:
+      - uses: actions/checkout@v4
+
+      # Docker login to GHCR (GITHUB_TOKEN is enough for public images)
+      - name: Login to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build & push backend
+      - name: Build backend image
+        run: docker build -t $IMAGE_BACKEND:$TAG -f backend/Dockerfile backend
+      - name: Push backend image
+        run: docker push $IMAGE_BACKEND:$TAG
+
+      # Build & push frontend
+      - name: Build frontend image
+        run: docker build -t $IMAGE_FRONTEND:$TAG -f frontend/Dockerfile frontend
+      - name: Push frontend image
+        run: docker push $IMAGE_FRONTEND:$TAG
+
+      # Ensure kubectl is available on the runner
+      - name: Install kubectl if missing
+        run: |
+          command -v kubectl || {
+            curl -L https://storage.googleapis.com/kubernetes-release/release/v1.33.4/bin/linux/amd64/kubectl -o kubectl
+            chmod +x kubectl && sudo mv kubectl /usr/local/bin/
+          }
+          kubectl version --client
+
+      # Apply manifests
+      - name: Apply Kubernetes manifests
+        run: |
+          kubectl apply -f k8s/namespace.yaml
+          kubectl -n monitoring-dashboard apply -f k8s/frontend-nginx-configmap.yaml
+          kubectl -n monitoring-dashboard apply -f k8s/backend-svc.yaml
+          kubectl -n monitoring-dashboard apply -f k8s/frontend-svc.yaml
+          kubectl -n monitoring-dashboard apply -f k8s/backend-deploy.yaml
+          kubectl -n monitoring-dashboard apply -f k8s/frontend-deploy.yaml
+
+      # Point deployments to the new immutable tag
+      - name: Set images to new tag
+        run: |
+          kubectl -n monitoring-dashboard set image deploy/backend  backend=$IMAGE_BACKEND:$TAG
+          kubectl -n monitoring-dashboard set image deploy/frontend frontend=$IMAGE_FRONTEND:$TAG
+
+      - name: Wait for rollout
+        run: |
+          kubectl -n monitoring-dashboard rollout status deploy/backend
+          kubectl -n monitoring-dashboard rollout status deploy/frontend
+
+      - name: Show status
+        run: kubectl -n monitoring-dashboard get pods,svc,endpoints

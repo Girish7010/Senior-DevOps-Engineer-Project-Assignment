@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  backend:
+    build: ./backend
+    image: local/metrics-backend:dev
+    container_name: metrics-backend
+    ports:
+      - "8080:8080"
+
+  frontend:
+    build: ./frontend
+    image: local/metrics-frontend:dev
+    container_name: metrics-frontend
+    depends_on:
+      - backend
+    ports:
+      - "8081:80"

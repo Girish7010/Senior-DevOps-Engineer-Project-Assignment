@@ -1,0 +1,21 @@
+# Local Deployment Guide (Short)
+
+Prereqs: Docker & docker compose; (K8s) kubectl & minikube
+
+1) Clone
+git clone https://github.com/Girish7010/Senior-DevOps-Engineer-Project-Assignment.git
+cd Senior-DevOps-Engineer-Project-Assignment
+
+2) Docker Compose
+docker compose up --build
+# UI: http://localhost:8081
+# API: http://localhost:8080/metrics
+
+3) Kubernetes (minikube)
+minikube start --driver=docker
+kubectl apply -f k8s/
+minikube service frontend-svc -n monitoring-dashboard --url
+
+Troubleshoot:
+kubectl -n monitoring-dashboard get pods,svc
+kubectl -n monitoring-dashboard logs deploy/backend -f

@@ -1,0 +1,30 @@
+## Prerequisites
+- Docker + docker compose
+- (K8s only) kubectl + minikube
+
+## 1) Clone Repo
+git clone https://github.com/Girish7010/Senior-DevOps-Engineer-Project-Assignment.git
+cd Senior-DevOps-Engineer-Project-Assignment
+
+## 2) Run with Docker Compose
+docker compose up --build
+# Frontend → http://localhost:8081
+# Backend API → http://localhost:8080/metrics
+# Logs → docker compose logs -f
+# Stop → docker compose down
+
+## 3) Run on Kubernetes (minikube)
+minikube start --driver=docker
+kubectl apply -f k8s/
+# Access frontend:
+minikube service frontend-svc -n monitoring-dashboard --url
+# Check rollout:
+kubectl -n monitoring-dashboard get pods
+# Logs:
+kubectl -n monitoring-dashboard logs deploy/frontend -f
+
+## 4) Troubleshooting
+# API failing? → check backend logs
+# NodePort not reachable? → minikube ip then curl http://<ip>:30080/
+# Fallback → port-forward:
+kubectl -n monitoring-dashboard port-forward svc/frontend-svc 8081:80

@@ -1,0 +1,23 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-nginx-config
+  namespace: monitoring-dashboard
+data:
+  nginx.conf: |
+    events {}
+    http {
+      server {
+        listen 80;
+        root /usr/share/nginx/html;
+
+        location / {
+          try_files $uri /index.html;
+        }
+
+        # Proxy to internal service DNS
+        location /api/ {
+          proxy_pass http://backend-svc.monitoring-dashboard.svc.cluster.local:8080/;
+        }
+      }
+    }
