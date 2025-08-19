@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-import random, time, logging, threading
+import random
+import time
+import logging
+import threading
 
 app = FastAPI(title="Metrics API", version="1.0.0")
 
