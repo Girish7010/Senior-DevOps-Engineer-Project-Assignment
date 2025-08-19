@@ -30,6 +30,7 @@ def create_app() -> Flask:
 
     @app.get("/")
     def root():
+        # Keep this wrapped so the line length stays under flake8's 79-char limit.
         return jsonify(
             {
                 "status": "ok",
